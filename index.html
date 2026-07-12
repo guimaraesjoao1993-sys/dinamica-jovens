@@ -4,42 +4,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dinâmica Interativa de Jovens</title>
+    <!-- Tailwind CSS v4 para estilização moderna e leve -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 min-h-screen flex flex-col justify-between">
 
+    <!-- CABEÇALHO GLOBAL -->
     <header class="bg-indigo-600 text-white p-4 shadow-md text-center font-bold text-xl tracking-wide">
         ⚡ DINÂMICA EM TEMPO REAL ⚡
     </header>
 
-    <main class="container mx-auto p-4 flex-grow max-w-6xl w-full">
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="container mx-auto p-4 flex-grow max-w-xl w-full">
         
-        <section id="tela-cadastro" class="hidden bg-white p-6 rounded-lg shadow-md max-w-xl mx-auto">
+        <!-- ================= TELA 1: CADASTRO DO GRUPO ================= -->
+        <section id="tela-cadastro" class="hidden bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-2xl font-bold mb-4 text-indigo-600 text-center">Registrar Grupo</h2>
             <div class="mb-4">
                 <label class="block font-medium mb-1">Nome do Grupo:</label>
-                <input type="text" id="input-nome-grupo" class="w-full border p-2 rounded focus:outline-indigo-500" placeholder="Ex: Jovens de Fé">
+                <input type="text" id="input-nome-grupo" class="w-full border p-2 rounded focus:outline-indigo-500 bg-white" placeholder="Ex: Jovens de Fé">
             </div>
             <div class="mb-4">
                 <label class="block font-medium mb-1">Membros (separados por vírgula):</label>
-                <textarea id="input-membros" class="w-full border p-2 rounded focus:outline-indigo-500" rows="3" placeholder="Ex: Lucas, Mariana, Pedro..."></textarea>
+                <textarea id="input-membros" class="w-full border p-2 rounded focus:outline-indigo-500 bg-white" rows="3" placeholder="Ex: Lucas, Mariana, Pedro..."></textarea>
             </div>
             <button id="btn-entrar" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded font-bold transition cursor-pointer">
                 Entrar na Dinâmica
             </button>
         </section>
 
-        <section id="tela-quiz" class="hidden bg-white p-6 rounded-lg shadow-md text-center max-w-xl mx-auto">
+        <!-- ================= TELA 2: QUIZ E ESPERA ================= -->
+        <section id="tela-quiz" class="hidden bg-white p-6 rounded-lg shadow-md text-center">
+            <!-- PONTUAÇÃO PRIVADA DO GRUPO -->
             <div id="grupo-info" class="flex justify-between items-center text-sm bg-indigo-50 text-indigo-700 p-3 rounded mb-4 font-semibold">
                 <span id="txt-nome-grupo-info">Grupo: --</span>
                 <span id="txt-pontos-grupo-info" class="bg-indigo-600 text-white px-2 py-0.5 rounded-full text-xs">0 pts</span>
             </div>
             
+            <!-- Estado A: Tela de Espera -->
             <div id="quiz-espera" class="py-8">
                 <div class="animate-bounce text-4xl mb-4">⏳</div>
                 <p class="text-lg font-medium text-gray-600">Aguardando o organizador liberar a pergunta...</p>
             </div>
 
+            <!-- Estado B: Pergunta Ativa -->
             <div id="quiz-pergunta" class="hidden text-left">
                 <span id="pergunta-pontos" class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded"></span>
                 <h3 id="pergunta-enunciado" class="text-xl font-bold my-3 text-gray-900"></h3>
@@ -51,6 +59,7 @@
                 </button>
             </div>
 
+            <!-- Estado C: Feedback Individual e Ranking -->
             <div id="quiz-feedback" class="hidden py-6">
                 <div id="feedback-resultado" class="text-2xl font-bold mb-4"></div>
                 <div id="painel-ranking" class="mt-6 text-left border-t pt-4 hidden">
@@ -60,84 +69,18 @@
             </div>
         </section>
 
-        <section id="tela-admin" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            <div class="md:col-span-2 space-y-6">
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <div class="flex justify-between items-center border-b pb-2 mb-4">
-                        <h2 class="text-2xl font-bold text-red-600">🎛️ Painel de Controle</h2>
-                        <button id="btn-admin-reset-total" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded font-bold transition cursor-pointer shadow-sm">
-                            ⚠️ Zerar Jogo e Grupos
-                        </button>
-                    </div>
-                    
-                    <div class="mb-6 bg-gray-50 p-4 rounded border border-gray-200">
-                        <h4 class="font-bold mb-2 text-gray-700">Controles do Jogo:</h4>
-                        <div class="space-y-2">
-                            <select id="admin-selecionar-pergunta" class="w-full border p-2 rounded bg-white font-medium">
-                                <option value="">-- Escolha uma pergunta para liberar --</option>
-                            </select>
-                            <div class="grid grid-cols-3 gap-2">
-                                <button id="btn-admin-liberar" class="bg-green-600 text-white p-2 rounded text-xs font-semibold hover:bg-green-700 cursor-pointer">Liberar Pergunta</button>
-                                <button id="btn-admin-revelar" class="bg-blue-600 text-white p-2 rounded text-xs font-semibold hover:bg-blue-700 cursor-pointer">Mostrar Resposta</button>
-                                <button id="btn-admin-espera" class="bg-slate-700 text-white p-2 rounded text-xs font-semibold hover:bg-slate-800 cursor-pointer">Modo de Espera</button>
-                            </div>
-                            <button id="btn-admin-ranking" class="w-full bg-purple-600 text-white p-2 rounded text-sm font-semibold hover:bg-purple-700 mt-2 cursor-pointer">Mostrar Ranking Final</button>
-                        </div>
-                        
-                        <div class="mt-5 border-t pt-3 border-gray-200">
-                            <h5 class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Quem já respondeu à pergunta atual:</h5>
-                            <div id="admin-status-grupos" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm font-medium">
-                                <p class="text-xs text-gray-400 italic">Nenhum grupo cadastrado ainda.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="bloco-formulario" class="bg-gray-50 p-4 rounded border border-gray-200">
-                        <div class="flex justify-between items-center mb-2">
-                            <h4 id="titulo-formulario" class="font-bold text-gray-700">Criar Nova Pergunta:</h4>
-                            <button id="btn-cancelar-edicao" class="hidden text-xs text-red-500 font-semibold underline cursor-pointer">Cancelar Edição</button>
-                        </div>
-                        <input type="hidden" id="admin-pergunta-id" value="">
-                        <div class="space-y-3 text-sm">
-                            <input type="text" id="admin-enunciado" class="w-full border p-2 rounded bg-white" placeholder="Enunciado da pergunta">
-                            <select id="admin-tipo" class="w-full border p-2 rounded bg-white">
-                                <option value="escrita">Escrita / Dissertativa</option>
-                                <option value="selecionada">Múltipla Escolha</option>
-                            </select>
-                            <input type="text" id="admin-opcoes" class="w-full border p-2 rounded bg-white hidden" placeholder="Opções separadas por ponto e vírgula ';'">
-                            <input type="text" id="admin-correta" class="w-full border p-2 rounded bg-white" placeholder="Resposta Correta Exata">
-                            <input type="number" id="admin-pontos" class="w-full border p-2 rounded bg-white" value="10">
-                            <button id="btn-admin-salvar" class="w-full bg-indigo-600 text-white p-2 rounded font-bold hover:bg-indigo-700 cursor-pointer">Salvar Pergunta</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="md:col-span-1">
-                <div class="bg-white p-6 rounded-lg shadow-md h-full flex flex-col">
-                    <h3 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2 flex items-center gap-2">
-                        📋 Banco de Perguntas
-                    </h3>
-                    <div id="lista-perguntas-criadas" class="space-y-2 overflow-y-auto flex-grow pr-1 max-h-[550px]">
-                        <p class="text-sm text-gray-400 italic">Nenhuma pergunta criada ainda.</p>
-                    </div>
-                </div>
-            </div>
-
-        </section>
-
     </main>
 
+    <!-- RODAPÉ GLOBAL -->
     <footer class="bg-gray-800 text-gray-400 text-xs text-center p-3">
         Desenvolvido para Dinâmicas de Grupo &copy; 2026
     </footer>
 
+    <!-- CONFIGURAÇÃO INTEGRADA COM O SEU BANCO DE DADOS -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // CONFIGURAÇÃO DO CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyCS26McgH7tnKts85QiinMAxBnz-cJdLYQ",
             authDomain: "dinamica-quiz-jovens.firebaseapp.com",
@@ -145,237 +88,42 @@
             projectId: "dinamica-quiz-jovens",
             storageBucket: "dinamica-quiz-jovens.firebasestorage.app",
             messagingSenderId: "160510201066",
-            appId: "1:160510201066:web:301642526d92a9310d1b93"        };
-
+            appId: "1:160510201066:web:301642526d92a9310d1b93"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const isAdmin = urlParams.get('admin') === 'true';
-
         const telaCadastro = document.getElementById('tela-cadastro');
         const telaQuiz = document.getElementById('tela-quiz');
-        const telaAdmin = document.getElementById('tela-admin');
 
         let perguntaAtivaLocal = null;
         let respostaSelecionadaOuEscrita = "";
         let perguntaJaPontuada = ""; 
-        let idDaPerguntaAtualGlobal = "";
 
-        if (isAdmin) {
-            telaAdmin.classList.remove('hidden');
-            configurarPainelAdmin();
-        } else {
-            const idGrupoSalvo = localStorage.getItem('idGrupoLogado');
-            if (idGrupoSalvo) {
-                // ANTES DE IR PRO QUIZ, CORRIGE: Checa se o grupo ainda existe de fato no banco de dados
-                get(ref(db, `grupos/${idGrupoSalvo}`)).then((snap) => {
-                    if (snap.exists()) {
-                        telaQuiz.classList.remove('hidden');
-                        inicializarFluxoQuiz(idGrupoSalvo);
-                    } else {
-                        localStorage.clear();
-                        telaCadastro.classList.remove('hidden');
-                    }
-                });
-            } else {
-                telaCadastro.classList.remove('hidden');
-            }
-        }
-
-        // --- SISTEMA DO ORGANIZADOR ---
-        function configurarPainelAdmin() {
-            const tipoSelect = document.getElementById('admin-tipo');
-            const opcoesInput = document.getElementById('admin-opcoes');
-            const selectPerguntas = document.getElementById('admin-selecionar-pergunta');
-            const painelLateralPerguntas = document.getElementById('lista-perguntas-criadas');
-            
-            const inputId = document.getElementById('admin-pergunta-id');
-            const txtTituloForm = document.getElementById('titulo-formulario');
-            const btnCancelar = document.getElementById('btn-cancelar-edicao');
-
-            tipoSelect.addEventListener('change', () => {
-                if(tipoSelect.value === 'selecionada') opcoesInput.classList.remove('hidden');
-                else opcoesInput.classList.add('hidden');
-            });
-
-            document.getElementById('btn-admin-salvar').addEventListener('click', async () => {
-                const idExistente = inputId.value;
-                const enunciado = document.getElementById('admin-enunciado').value;
-                const tipo = tipoSelect.value;
-                const respostaCorreta = document.getElementById('admin-correta').value.trim();
-                const pontuacao = Number(document.getElementById('admin-pontos').value);
-                
-                let perguntaRef;
-                let idFinal;
-
-                if (idExistente) {
-                    perguntaRef = ref(db, `perguntas/${idExistente}`);
-                    idFinal = idExistente;
+        // Controle de Sessão Inteligente
+        const idGrupoSalvo = localStorage.getItem('idGrupoLogado');
+        if (idGrupoSalvo) {
+            get(ref(db, `grupos/${idGrupoSalvo}`)).then((snap) => {
+                if (snap.exists()) {
+                    telaQuiz.classList.remove('hidden');
+                    inicializarFluxoQuiz(idGrupoSalvo);
                 } else {
-                    const novaRef = push(ref(db, 'perguntas'));
-                    perguntaRef = novaRef;
-                    idFinal = novaRef.key;
+                    localStorage.clear();
+                    telaCadastro.classList.remove('hidden');
                 }
-
-                let dados = { id: idFinal, enunciado, tipo, respostaCorreta, pontuacao };
-                if(tipo === 'selecionada') dados.opcoes = opcoesInput.value.split(';');
-
-                await set(perguntaRef, dados);
-                alert(idExistente ? "Pergunta atualizada!" : "Pergunta criada!");
-                resetarFormulario();
+            }).catch(() => {
+                telaCadastro.classList.remove('hidden');
             });
-
-            onValue(ref(db, 'perguntas'), (snapshot) => {
-                selectPerguntas.innerHTML = '<option value="">-- Escolha uma pergunta para liberar --</option>';
-                painelLateralPerguntas.innerHTML = "";
-
-                if (!snapshot.exists()) {
-                    painelLateralPerguntas.innerHTML = '<p class="text-sm text-gray-400 italic">Nenhuma pergunta criada ainda.</p>';
-                    return;
-                }
-
-                snapshot.forEach((childSnapshot) => {
-                    const p = childSnapshot.val();
-                    selectPerguntas.innerHTML += `<option value="${p.id}">${p.enunciado} (${p.pontuacao}pts)</option>`;
-                    
-                    const card = document.createElement('div');
-                    card.className = "bg-gray-50 hover:bg-indigo-50 border border-gray-200 rounded p-3 transition text-left relative group";
-                    card.innerHTML = `
-                        <div class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">${p.tipo === 'selecionada' ? 'Múltipla Escolha' : 'Dissertativa'} • ${p.pontuacao}pts</div>
-                        <p class="text-sm font-semibold text-gray-800 pr-8 line-clamp-2">${p.enunciado}</p>
-                        <div class="mt-2 flex gap-2">
-                            <button class="text-xs text-blue-600 hover:underline font-medium cursor-pointer btn-editar-p" data-id="${p.id}">Editar</button>
-                            <button class="text-xs text-red-500 hover:underline font-medium cursor-pointer btn-deletar-p" data-id="${p.id}">Excluir</button>
-                        </div>
-                    `;
-                    painelLateralPerguntas.appendChild(card);
-                });
-
-                document.querySelectorAll('.btn-editar-p').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        const idParaEditar = e.target.getAttribute('data-id');
-                        const pSnap = await get(ref(db, `perguntas/${idParaEditar}`));
-                        if (pSnap.exists()) {
-                            const pData = pSnap.val();
-                            inputId.value = pData.id;
-                            document.getElementById('admin-enunciado').value = pData.enunciado;
-                            tipoSelect.value = pData.tipo;
-                            document.getElementById('admin-correta').value = pData.respostaCorreta;
-                            document.getElementById('admin-pontos').value = pData.pontuacao;
-                            
-                            if (pData.tipo === 'selecionada') {
-                                opcoesInput.classList.remove('hidden');
-                                opcoesInput.value = pData.opcoes.join(';');
-                            } else {
-                                opcoesInput.classList.add('hidden');
-                                opcoesInput.value = "";
-                            }
-
-                            txtTituloForm.innerText = "✏️ Editando Pergunta:";
-                            txtTituloForm.classList.add('text-blue-600');
-                            btnCancelar.classList.remove('hidden');
-                            document.getElementById('bloco-formulario').scrollIntoView({ behavior: 'smooth' });
-                        }
-                    });
-                });
-
-                document.querySelectorAll('.btn-deletar-p').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        if (confirm("Deseja deletar esta pergunta?")) {
-                            const idParaDeletar = e.target.getAttribute('data-id');
-                            await remove(ref(db, `perguntas/${idParaDeletar}`));
-                            alert("Pergunta removida!");
-                            if (inputId.value === idParaDeletar) resetarFormulario();
-                        }
-                    });
-                });
-            });
-
-            btnCancelar.addEventListener('click', resetarFormulario);
-
-            function resetarFormulario() {
-                inputId.value = "";
-                document.getElementById('admin-enunciado').value = "";
-                document.getElementById('admin-correta').value = "";
-                opcoesInput.value = "";
-                opcoesInput.classList.add('hidden');
-                tipoSelect.value = "escrita";
-                document.getElementById('admin-pontos').value = "10";
-                txtTituloForm.innerText = "Criar Nova Pergunta:";
-                txtTituloForm.classList.remove('text-blue-600');
-                btnCancelar.classList.add('hidden');
-            }
-
-            onValue(ref(db, 'status_jogo'), (snapshot) => {
-                const s = snapshot.val();
-                idDaPerguntaAtualGlobal = s ? s.perguntaAtualId : "";
-            });
-
-            onValue(ref(db, 'grupos'), (snapshot) => {
-                const painelStatus = document.getElementById('admin-status-grupos');
-                painelStatus.innerHTML = "";
-                
-                if(!snapshot.exists()) {
-                    painelStatus.innerHTML = '<p class="text-xs text-gray-400 italic">Nenhum grupo cadastrado ainda.</p>';
-                    return;
-                }
-
-                snapshot.forEach((child) => {
-                    const g = child.val();
-                    const jaRespondeuAAtual = g.respostasEnviadas && g.respostasEnviadas[idDaPerguntaAtualGlobal];
-                    
-                    let tagStatus = "";
-                    if (idDaPerguntaAtualGlobal === "") {
-                        tagStatus = `<span class="text-gray-400 font-normal">(${g.pontuacaoTotal || 0} pts)</span>`;
-                    } else if (jaRespondeuAAtual) {
-                        tagStatus = `<span class="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full font-bold animate-pulse">🟢 OK!</span>`;
-                    } else {
-                        tagStatus = `<span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full font-bold">🟡 Pendente</span>`;
-                    }
-
-                    painelStatus.innerHTML += `
-                        <div class="flex justify-between items-center bg-white p-2 rounded border border-gray-200 shadow-xs">
-                            <span class="text-gray-700 font-semibold">👥 ${g.nomeGrupo} <small class="text-gray-400 text-[10px] font-normal">(${g.pontuacaoTotal || 0} pts)</small></span>
-                            ${tagStatus}
-                        </div>`;
-                });
-            });
-
-            // CORREÇÃO DO RESET: Remove apenas os dados da árvore "grupos" e limpa o status do jogo de forma limpa
-            document.getElementById('btn-admin-reset-total').addEventListener('click', async () => {
-                if (confirm("⚠️ ATENÇÃO: Deseja zerar os grupos? Os líderes atuais serão desconectados.")) {
-                    await remove(ref(db, 'grupos')); 
-                    await set(ref(db, 'status_jogo'), { fase: "forcar_deslogar", perguntaAtualId: "", mostrarRanking: false });
-                    alert("Sistema resetado de forma segura!");
-                }
-            });
-
-            document.getElementById('btn-admin-liberar').addEventListener('click', () => {
-                const idSel = selectPerguntas.value;
-                if(!idSel) return alert("Selecione uma pergunta primeiro!");
-                update(ref(db, 'status_jogo'), { fase: "pergunta_visivel", perguntaAtualId: idSel, mostrarRanking: false });
-            });
-
-            document.getElementById('btn-admin-revelar').addEventListener('click', () => {
-                update(ref(db, 'status_jogo'), { fase: "resposta_visivel" });
-            });
-
-            document.getElementById('btn-admin-espera').addEventListener('click', () => {
-                update(ref(db, 'status_jogo'), { fase: "aguardando", perguntaAtualId: "", mostrarRanking: false });
-            });
-
-            document.getElementById('btn-admin-ranking').addEventListener('click', () => {
-                update(ref(db, 'status_jogo'), { fase: "ranking_final", mostrarRanking: true });
-            });
+        } else {
+            telaCadastro.classList.remove('hidden');
         }
 
-        // --- SISTEMA DOS LÍDERES ---
+        // --- ENTRADA DO GRUPO ---
         document.getElementById('btn-entrar').addEventListener('click', async () => {
-            const nomeGrupo = document.getElementById('input-nome-grupo').value;
-            const membros = document.getElementById('input-membros').value;
+            const nomeGrupo = document.getElementById('input-nome-grupo').value.trim();
+            const membros = document.getElementById('input-membros').value.trim();
+            
             if(!nomeGrupo) return alert("Por favor, digite o nome do seu grupo!");
 
             const novoGrupoRef = push(ref(db, 'grupos'));
@@ -386,6 +134,7 @@
             location.reload();
         });
 
+        // --- FLUXO DO JOGO EM TEMPO REAL ---
         function inicializarFluxoQuiz(idGrupo) {
             document.getElementById('txt-nome-grupo-info').innerText = `Grupo: ${localStorage.getItem('nomeGrupoLogado')}`;
             
@@ -394,6 +143,7 @@
             const areaFeedback = document.getElementById('quiz-feedback');
             const btnEnviar = document.getElementById('btn-enviar-resposta');
 
+            // Escutar pontuação individual do grupo
             onValue(ref(db, `grupos/${idGrupo}`), (snapshot) => {
                 const dadosGrupo = snapshot.val();
                 if(dadosGrupo) {
@@ -401,23 +151,25 @@
                 }
             });
 
+            // Escutar comandos em tempo real vindo do admin.html
             onValue(ref(db, 'status_jogo'), async (snapshot) => {
                 const status = snapshot.val();
                 if(!status) return;
 
-                // CORREÇÃO CRUCIAL: Só desloga se o admin clicar explicitamente no botão vermelho de Reset Geral
+                // Forçar deslogar se o admin resetar o jogo
                 if (status.fase === "forcar_deslogar") {
                     localStorage.clear(); 
                     location.reload(); 
                     return;
                 }
 
+                // Modo de Espera (Ampulheta)
                 if(status.fase === "aguardando") {
                     mostrarSecao(areaEspera);
                     return;
                 }
 
-                // Fase 1: Pergunta na Tela
+                // Pergunta Liberada
                 if(status.fase === "pergunta_visivel") {
                     const pSnap = await get(ref(db, `perguntas/${status.perguntaAtualId}`));
                     perguntaAtivaLocal = pSnap.val();
@@ -436,7 +188,7 @@
                     }
 
                     if(perguntaAtivaLocal.tipo === 'escrita') {
-                        areaResp.innerHTML = `<input type="text" id="resp-escrita" class="w-full border p-3 rounded bg-white" placeholder="Digite a resposta do grupo...">`;
+                        areaResp.innerHTML = `<input type="text" id="resp-escrita" class="w-full border p-3 rounded bg-white focus:outline-indigo-500" placeholder="Digite a resposta do grupo...">`;
                     } else if(perguntaAtivaLocal.tipo === 'selecionada') {
                         perguntaAtivaLocal.opcoes.forEach(opcao => {
                             areaResp.innerHTML += `
@@ -448,7 +200,7 @@
                     mostrarSecao(areaPergunta);
                 }
 
-                // Fase 2: Revelação e Soma de Pontos
+                // Revelação da Resposta Correcta
                 if(status.fase === "resposta_visivel" && perguntaAtivaLocal) {
                     mostrarSecao(areaFeedback);
                     const feedbackTexto = document.getElementById('feedback-resultado');
@@ -460,7 +212,7 @@
                     const acertou = respostaSelecionadaOuEscrita.trim().toLowerCase() === perguntaAtivaLocal.respostaCorreta.trim().toLowerCase();
                     
                     if(acertou) {
-                        feedbackTexto.innerHTML = "<span class='text-green-600 font-bold'>🎉 Acertaram! Parabéns!</span>";
+                        feedbackTexto.innerHTML = "<span class='text-green-600 font-bold text-3xl block mb-2'>🎉 ACERTARAM!</span><span class='text-sm text-gray-500 font-medium'>Aguarde a próxima pergunta subir...</span>";
                         
                         if(perguntaJaPontuada !== status.perguntaAtualId) {
                             perguntaJaPontuada = status.perguntaAtualId; 
@@ -472,11 +224,11 @@
                             }
                         }
                     } else {
-                        feedbackTexto.innerHTML = `<span class='text-red-600 font-bold'>❌ Não foi dessa vez!</span><br><span class='text-sm text-gray-500 font-normal'>A resposta certa era: <strong>${perguntaAtivaLocal.respostaCorreta}</strong></span>`;
+                        feedbackTexto.innerHTML = `<span class='text-red-600 font-bold text-2xl block mb-1'>❌ NÃO FOI DESSA VEZ!</span><br><span class='text-base text-gray-600 font-normal'>A resposta certa era: <strong class="text-indigo-600">${perguntaAtivaLocal.respostaCorreta}</strong></span>`;
                     }
                 }
 
-                // Fase 3: Exibição do Ranking Geral
+                // Exibição do Ranking Geral
                 if(status.mostrarRanking) {
                     mostrarSecao(areaFeedback);
                     document.getElementById('painel-ranking').classList.remove('hidden');
@@ -495,6 +247,7 @@
                 }
             });
 
+            // Enviar Resposta
             btnEnviar.onclick = async () => {
                 if(perguntaAtivaLocal.tipo === 'escrita' && document.getElementById('resp-escrita')) {
                     respostaSelecionadaOuEscrita = document.getElementById('resp-escrita').value;
