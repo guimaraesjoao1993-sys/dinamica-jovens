@@ -18,13 +18,13 @@
             <h2 class="text-2xl font-bold mb-4 text-indigo-600 text-center">Registrar Grupo</h2>
             <div class="mb-4">
                 <label class="block font-medium mb-1">Nome do Grupo:</label>
-                <input type="text" id="input-nome-grupo" class="w-full border p-2 rounded" placeholder="Ex: Jovens de Fé">
+                <input type="text" id="input-nome-grupo" class="w-full border p-2 rounded focus:outline-indigo-500" placeholder="Ex: Jovens de Fé">
             </div>
             <div class="mb-4">
                 <label class="block font-medium mb-1">Membros (separados por vírgula):</label>
-                <textarea id="input-membros" class="w-full border p-2 rounded" rows="3" placeholder="Ex: Lucas, Mariana..."></textarea>
+                <textarea id="input-membros" class="w-full border p-2 rounded focus:outline-indigo-500" rows="3" placeholder="Ex: Lucas, Mariana, Pedro..."></textarea>
             </div>
-            <button id="btn-entrar" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded font-bold transition">
+            <button id="btn-entrar" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded font-bold transition cursor-pointer">
                 Entrar na Dinâmica
             </button>
         </section>
@@ -43,26 +43,39 @@
                 
                 <div id="area-resposta" class="space-y-3 my-4"></div>
                 
-                <button id="btn-enviar-resposta" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded font-bold transition">
+                <button id="btn-enviar-resposta" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded font-bold transition cursor-pointer">
                     Enviar Resposta
                 </button>
             </div>
 
-            <div id="quiz-feedback" class="hidden py-6"></div>
+            <div id="quiz-feedback" class="hidden py-6">
+                <div id="feedback-resultado" class="text-2xl font-bold mb-4"></div>
+                <div id="painel-ranking" class="mt-6 text-left border-t pt-4 hidden">
+                    <h4 class="text-xl font-bold mb-2 text-indigo-700 text-center">🏆 RANKING GERAL 🏆</h4>
+                    <ol id="lista-ranking" class="list-decimal list-inside space-y-2 font-medium"></ol>
+                </div>
+            </div>
         </section>
 
         <section id="tela-admin" class="hidden bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-2xl font-bold mb-4 text-red-600 border-b pb-2">🎛️ Painel do Organizador</h2>
             
-            <div class="mb-6 bg-gray-50 p-4 rounded border">
+            <div class="mb-6 bg-gray-50 p-4 rounded border border-gray-200">
                 <h4 class="font-bold mb-2 text-gray-700">Controles do Jogo:</h4>
-                <div class="grid grid-cols-2 gap-2">
-                    <button id="btn-admin-liberar" class="bg-green-600 text-white p-2 rounded text-sm font-semibold">Liberar Próxima Pergunta</button>
-                    <button id="btn-admin-revelar" class="bg-blue-600 text-white p-2 rounded text-sm font-semibold">Mostrar Resposta</button>
+                <div class="space-y-2">
+                    <select id="admin-selecionar-pergunta" class="w-full border p-2 rounded bg-white font-medium">
+                        <option value="">-- Escolha uma pergunta para liberar --</option>
+                    </select>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btn-admin-liberar" class="bg-green-600 text-white p-2 rounded text-sm font-semibold hover:bg-green-700 cursor-pointer">Liberar Pergunta</button>
+                        <button id="btn-admin-revelar" class="bg-blue-600 text-white p-2 rounded text-sm font-semibold hover:bg-blue-700 cursor-pointer">Mostrar Resposta</button>
+                    </div>
+                    <button id="btn-admin-ranking" class="w-full bg-purple-600 text-white p-2 rounded text-sm font-semibold hover:bg-purple-700 mt-2 cursor-pointer">Mostrar Ranking Final</button>
                 </div>
+                <div id="admin-status-grupos" class="mt-4 text-xs text-gray-500 font-mono"></div>
             </div>
 
-            <div class="bg-gray-50 p-4 rounded border">
+            <div class="bg-gray-50 p-4 rounded border border-gray-200">
                 <h4 class="font-bold mb-2 text-gray-700">Criar Nova Pergunta:</h4>
                 <div class="space-y-3 text-sm">
                     <input type="text" id="admin-enunciado" class="w-full border p-2 rounded bg-white" placeholder="Enunciado da pergunta">
@@ -70,10 +83,10 @@
                         <option value="escrita">Escrita / Dissertativa</option>
                         <option value="selecionada">Múltipla Escolha</option>
                     </select>
-                    <input type="text" id="admin-opcoes" class="w-full border p-2 rounded bg-white hidden" placeholder="Opções (separadas por ponto e vírgula ';')">
+                    <input type="text" id="admin-opcoes" class="w-full border p-2 rounded bg-white hidden" placeholder="Opções separadas por ponto e vírgula ';'">
                     <input type="text" id="admin-correta" class="w-full border p-2 rounded bg-white" placeholder="Resposta Correta Exata">
                     <input type="number" id="admin-pontos" class="w-full border p-2 rounded bg-white" value="10">
-                    <button id="btn-admin-salvar" class="w-full bg-indigo-600 text-white p-2 rounded font-bold">Salvar Pergunta</button>
+                    <button id="btn-admin-salvar" class="w-full bg-indigo-600 text-white p-2 rounded font-bold hover:bg-indigo-700 cursor-pointer">Salvar Pergunta</button>
                 </div>
             </div>
         </section>
@@ -86,22 +99,22 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // CONFIGURAÇÃO DO CONFIG - COLOQUE SEUS DADOS EXATOS AQUI
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_AUTH_DOMAIN",
-            databaseURL: "SUA_DATABASE_URL_DO_REALTIME_DATABASE", // <--- Adicione a URL aqui!
-            projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_STORAGE_BUCKET",
-            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-            appId: "SUA_APP_ID"
+            apiKey: "AIzaSyCS26McgH7tnKts85QiinMAxBnz-cJdLYQ",
+            authDomain: "dinamica-quiz-jovens.firebaseapp.com",
+            databaseURL: "https://dinamica-quiz-jovens-default-rtdb.firebaseio.com",
+            projectId: "dinamica-quiz-jovens",
+            storageBucket: "dinamica-quiz-jovens.firebasestorage.app",
+            messagingSenderId: "160510201066",
+            appId: "1:160510201066:web:301642526d92a9310d1b93"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Identificação de Rotas
         const urlParams = new URLSearchParams(window.location.search);
         const isAdmin = urlParams.get('admin') === 'true';
 
@@ -109,6 +122,10 @@
         const telaQuiz = document.getElementById('tela-quiz');
         const telaAdmin = document.getElementById('tela-admin');
 
+        let perguntaAtivaLocal = null;
+        let respostaSelecionadaOuEscrita = "";
+
+        // Gerenciamento de Rotas
         if (isAdmin) {
             telaAdmin.classList.remove('hidden');
             configurarPainelAdmin();
@@ -122,10 +139,11 @@
             }
         }
 
-        // --- PAINEL DO ORGANIZADOR ---
+        // --- SISTEMA DO ORGANIZADOR ---
         function configurarPainelAdmin() {
             const tipoSelect = document.getElementById('admin-tipo');
             const opcoesInput = document.getElementById('admin-opcoes');
+            const selectPerguntas = document.getElementById('admin-selecionar-pergunta');
             
             tipoSelect.addEventListener('change', () => {
                 if(tipoSelect.value === 'selecionada') opcoesInput.classList.remove('hidden');
@@ -135,40 +153,60 @@
             document.getElementById('btn-admin-salvar').addEventListener('click', async () => {
                 const enunciado = document.getElementById('admin-enunciado').value;
                 const tipo = tipoSelect.value;
-                const respostaCorreta = document.getElementById('admin-correta').value;
+                const respostaCorreta = document.getElementById('admin-correta').value.trim();
                 const pontuacao = Number(document.getElementById('admin-pontos').value);
                 
-                const listaPerguntasRef = ref(db, 'perguntas');
-                const novaPerguntaRef = push(listaPerguntasRef);
-
+                const novaPerguntaRef = push(ref(db, 'perguntas'));
                 let dados = { id: novaPerguntaRef.key, enunciado, tipo, respostaCorreta, pontuacao };
                 if(tipo === 'selecionada') dados.opcoes = opcoesInput.value.split(';');
 
                 await set(novaPerguntaRef, dados);
-                alert("Pergunta salva com sucesso no Realtime Database!");
+                alert("Pergunta criada!");
                 document.getElementById('admin-enunciado').value = "";
                 document.getElementById('admin-correta').value = "";
+                opcoesInput.value = "";
             });
 
-            // Inicializa o controle global do jogo se não existir
-            update(ref(db, 'status_jogo'), { fase: "aguardando", perguntaAtualId: "" });
+            onValue(ref(db, 'perguntas'), (snapshot) => {
+                selectPerguntas.innerHTML = '<option value="">-- Escolha uma pergunta para liberar --</option>';
+                snapshot.forEach((childSnapshot) => {
+                    const p = childSnapshot.val();
+                    selectPerguntas.innerHTML += `<option value="${p.id}">${p.enunciado} (${p.pontuacao}pts)</option>`;
+                });
+            });
+
+            document.getElementById('btn-admin-liberar').addEventListener('click', () => {
+                const idSel = selectPerguntas.value;
+                if(!idSel) return alert("Selecione uma pergunta primeiro!");
+                update(ref(db, 'status_jogo'), { fase: "pergunta_visivel", perguntaAtualId: idSel, mostrarRanking: false });
+            });
+
+            document.getElementById('btn-admin-revelar').addEventListener('click', () => {
+                update(ref(db, 'status_jogo'), { fase: "resposta_visivel" });
+            });
+
+            document.getElementById('btn-admin-ranking').addEventListener('click', () => {
+                update(ref(db, 'status_jogo'), { fase: "ranking_final", mostrarRanking: true });
+            });
+
+            onValue(ref(db, 'grupos'), (snapshot) => {
+                const painelStatus = document.getElementById('admin-status-grupos');
+                painelStatus.innerHTML = "<strong>Grupos Registrados / Pontuação:</strong><br>";
+                snapshot.forEach((child) => {
+                    const g = child.val();
+                    painelStatus.innerHTML += `• ${g.nomeGrupo}: ${g.pontuacaoTotal} pts<br>`;
+                });
+            });
         }
 
-        // --- ENTRADA DOS LÍDERES ---
+        // --- SISTEMA DOS LÍDERES ---
         document.getElementById('btn-entrar').addEventListener('click', async () => {
             const nomeGrupo = document.getElementById('input-nome-grupo').value;
             const membros = document.getElementById('input-membros').value;
+            if(!nomeGrupo) return alert("Por favor, digite o nome do seu grupo!");
 
-            if(!nomeGrupo) return alert("Insira o nome do grupo!");
-
-            const listaGruposRef = ref(db, 'grupos');
-            const novoGrupoRef = push(listaGruposRef);
-
-            await set(novoGrupoRef, {
-                nomeGrupo,
-                membros: membros,
-                pontuacaoTotal: 0
-            });
+            const novoGrupoRef = push(ref(db, 'grupos'));
+            await set(novoGrupoRef, { id: novoGrupoRef.key, nomeGrupo, membros, pontuacaoTotal: 0 });
 
             localStorage.setItem('idGrupoLogado', novoGrupoRef.key);
             localStorage.setItem('nomeGrupoLogado', nomeGrupo);
@@ -176,16 +214,107 @@
         });
 
         function inicializarFluxoQuiz(idGrupo) {
-            document.getElementById('grupo-info').innerText = `Grupo: ${localStorage.getItem('nomeGrupoLogado')}`;
+            document.getElementById('grupo-info').innerText = `Grupo Ativo: ${localStorage.getItem('nomeGrupoLogado')}`;
             
-            // Aqui o Realtime Database vai escutar as ações do Admin instantaneamente
-            onValue(ref(db, 'status_jogo'), (snapshot) => {
-                const status = snapshot.val();
-                if(!status) return;
+            const areaEspera = document.getElementById('quiz-espera');
+            const areaPergunta = document.getElementById('quiz-pergunta');
+            const areaFeedback = document.getElementById('quiz-feedback');
+            const btnEnviar = document.getElementById('btn-enviar-resposta');
 
-                // Lógica de atualização de telas em tempo real vai entrar aqui no próximo passo!
-                console.log("Mudança de estado do jogo detectada:", status);
+            onValue(ref(db, 'status_jogo'), async (snapshot) => {
+                const status = snapshot.val();
+                if(!status || status.fase === "aguardando") {
+                    mostrarSecao(areaEspera);
+                    return;
+                }
+
+                if(status.fase === "pergunta_visivel") {
+                    const pSnap = await get(ref(db, `perguntas/${status.perguntaAtualId}`));
+                    perguntaAtivaLocal = pSnap.val();
+
+                    document.getElementById('pergunta-pontos').innerText = `${perguntaAtivaLocal.pontuacao} Pontos`;
+                    document.getElementById('pergunta-enunciado').innerText = perguntaAtivaLocal.enunciado;
+                    
+                    const areaResp = document.getElementById('area-resposta');
+                    areaResp.innerHTML = "";
+                    respostaSelecionadaOuEscrita = "";
+
+                    if(perguntaAtivaLocal.tipo === 'escrita') {
+                        areaResp.innerHTML = `<input type="text" id="resp-escrita" class="w-full border p-3 rounded" placeholder="Digite a resposta do grupo...">`;
+                    } else if(perguntaAtivaLocal.tipo === 'selecionada') {
+                        perguntaAtivaLocal.opcoes.forEach(opcao => {
+                            areaResp.innerHTML += `
+                                <button class="w-full text-left border p-3 rounded hover:bg-indigo-50 font-medium btn-opcao transition cursor-pointer" onclick="window.selecionarOpcaoLocal(this, '${opcao}')">
+                                    ${opcao}
+                                </button>`;
+                        });
+                    }
+                    btnEnviar.disabled = false;
+                    btnEnviar.innerText = "Enviar Resposta";
+                    mostrarSecao(areaPergunta);
+                }
+
+                if(status.fase === "resposta_visivel" && perguntaAtivaLocal) {
+                    mostrarSecao(areaFeedback);
+                    const feedbackTexto = document.getElementById('feedback-resultado');
+
+                    if(perguntaAtivaLocal.tipo === 'escrita' && document.getElementById('resp-escrita')) {
+                        respostaSelecionadaOuEscrita = document.getElementById('resp-escrita').value;
+                    }
+
+                    const acertou = respostaSelecionadaOuEscrita.trim().toLowerCase() === perguntaAtivaLocal.respostaCorreta.trim().toLowerCase();
+                    
+                    if(acertou) {
+                        feedbackTexto.innerHTML = "<span class='text-green-600 font-bold'>🎉 Acertaram! Parabéns!</span>";
+                        if(btnEnviar.disabled === false) {
+                            const grupoSnap = await get(ref(db, `grupos/${idGrupo}`));
+                            const pontosAtuais = grupoSnap.val().pontuacaoTotal || 0;
+                            await update(ref(db, `grupos/${idGrupo}`), { pontuacaoTotal: pontosAtuais + perguntaAtivaLocal.pontuacao });
+                        }
+                    } else {
+                        feedbackTexto.innerHTML = `<span class='text-red-600 font-bold'>❌ Não foi dessa vez!</span><br><span class='text-sm text-gray-500 font-normal'>A resposta certa era: <strong>${perguntaAtivaLocal.respostaCorreta}</strong></span>`;
+                    }
+                    btnEnviar.disabled = true;
+                }
+
+                if(status.mostrarRanking) {
+                    mostrarSecao(areaFeedback);
+                    document.getElementById('painel-ranking').classList.remove('hidden');
+                    
+                    onValue(ref(db, 'grupos'), (gSnapshot) => {
+                        const lista = document.getElementById('lista-ranking');
+                        lista.innerHTML = "";
+                        let gruposOrdenados = [];
+                        gSnapshot.forEach(c => { gruposOrdenados.push(c.val()); });
+                        gruposOrdenados.sort((a,b) => b.pontuacaoTotal - a.pontuacaoTotal);
+
+                        gruposOrdenados.forEach(g => {
+                            lista.innerHTML += `<li class="flex justify-between border-b border-gray-100 py-2"><span>👥 ${g.nomeGrupo}</span> <span class="text-indigo-600 font-bold">${g.pontuacaoTotal} pts</span></li>`;
+                        });
+                    });
+                }
             });
+
+            btnEnviar.onclick = () => {
+                if(perguntaAtivaLocal.tipo === 'escrita' && document.getElementById('resp-escrita')) {
+                    respostaSelecionadaOuEscrita = document.getElementById('resp-escrita').value;
+                }
+                btnEnviar.disabled = true;
+                btnEnviar.innerText = "Enviado! Aguardando o palestrante...";
+            };
+        }
+
+        window.selecionarOpcaoLocal = function(botao, valor) {
+            document.querySelectorAll('.btn-opcao').forEach(b => b.classList.remove('bg-indigo-200', 'border-indigo-500'));
+            botao.classList.add('bg-indigo-200', 'border-indigo-500');
+            respostaSelecionadaOuEscrita = valor;
+        };
+
+        function mostrarSecao(secaoAtiva) {
+            document.getElementById('quiz-espera').classList.add('hidden');
+            document.getElementById('quiz-pergunta').classList.add('hidden');
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            secaoAtiva.classList.remove('hidden');
         }
     </script>
 </body>
