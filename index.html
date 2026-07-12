@@ -137,7 +137,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, push, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // CONFIGURAÇÃO DO CONFIG - COLOQUE SEUS DADOS EXATOS AQUI
+        // CONFIGURAÇÃO DO CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyCS26McgH7tnKts85QiinMAxBnz-cJdLYQ",
             authDomain: "dinamica-quiz-jovens.firebaseapp.com",
@@ -146,6 +146,8 @@
             storageBucket: "dinamica-quiz-jovens.firebasestorage.app",
             messagingSenderId: "160510201066",
             appId: "1:160510201066:web:301642526d92a9310d1b93"        };
+
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
@@ -168,8 +170,16 @@
         } else {
             const idGrupoSalvo = localStorage.getItem('idGrupoLogado');
             if (idGrupoSalvo) {
-                telaQuiz.classList.remove('hidden');
-                inicializarFluxoQuiz(idGrupoSalvo);
+                // ANTES DE IR PRO QUIZ, CORRIGE: Checa se o grupo ainda existe de fato no banco de dados
+                get(ref(db, `grupos/${idGrupoSalvo}`)).then((snap) => {
+                    if (snap.exists()) {
+                        telaQuiz.classList.remove('hidden');
+                        inicializarFluxoQuiz(idGrupoSalvo);
+                    } else {
+                        localStorage.clear();
+                        telaCadastro.classList.remove('hidden');
+                    }
+                });
             } else {
                 telaCadastro.classList.remove('hidden');
             }
@@ -304,7 +314,6 @@
                 idDaPerguntaAtualGlobal = s ? s.perguntaAtualId : "";
             });
 
-            // MONITORAMENTO: Mostra todos os grupos e quem respondeu para o Organizador
             onValue(ref(db, 'grupos'), (snapshot) => {
                 const painelStatus = document.getElementById('admin-status-grupos');
                 painelStatus.innerHTML = "";
@@ -335,11 +344,12 @@
                 });
             });
 
+            // CORREÇÃO DO RESET: Remove apenas os dados da árvore "grupos" e limpa o status do jogo de forma limpa
             document.getElementById('btn-admin-reset-total').addEventListener('click', async () => {
-                if (confirm("⚠️ ATENÇÃO: Deseja zerar os grupos?")) {
+                if (confirm("⚠️ ATENÇÃO: Deseja zerar os grupos? Os líderes atuais serão desconectados.")) {
                     await remove(ref(db, 'grupos')); 
-                    await set(ref(db, 'status_jogo'), { fase: "aguardando_cadastro", perguntaAtualId: "", mostrarRanking: false });
-                    alert("Sistema resetado!");
+                    await set(ref(db, 'status_jogo'), { fase: "forcar_deslogar", perguntaAtualId: "", mostrarRanking: false });
+                    alert("Sistema resetado de forma segura!");
                 }
             });
 
@@ -353,7 +363,6 @@
                 update(ref(db, 'status_jogo'), { fase: "resposta_visivel" });
             });
 
-            // NOVO COMANDO: Força todo mundo a voltar para a tela de carregamento/espera
             document.getElementById('btn-admin-espera').addEventListener('click', () => {
                 update(ref(db, 'status_jogo'), { fase: "aguardando", perguntaAtualId: "", mostrarRanking: false });
             });
@@ -385,7 +394,6 @@
             const areaFeedback = document.getElementById('quiz-feedback');
             const btnEnviar = document.getElementById('btn-enviar-resposta');
 
-            // Escuta exclusiva da pontuação PRIVADA do grupo do líder
             onValue(ref(db, `grupos/${idGrupo}`), (snapshot) => {
                 const dadosGrupo = snapshot.val();
                 if(dadosGrupo) {
@@ -397,13 +405,13 @@
                 const status = snapshot.val();
                 if(!status) return;
 
-                if (status.fase === "aguardando_cadastro") {
+                // CORREÇÃO CRUCIAL: Só desloga se o admin clicar explicitamente no botão vermelho de Reset Geral
+                if (status.fase === "forcar_deslogar") {
                     localStorage.clear(); 
                     location.reload(); 
                     return;
                 }
 
-                // Resposta ao Comando de Modo de Espera do Organizador
                 if(status.fase === "aguardando") {
                     mostrarSecao(areaEspera);
                     return;
@@ -428,11 +436,11 @@
                     }
 
                     if(perguntaAtivaLocal.tipo === 'escrita') {
-                        areaResp.innerHTML = `<input type="text" id="resp-escrita" class="w-full border p-3 rounded" placeholder="Digite a resposta do grupo...">`;
+                        areaResp.innerHTML = `<input type="text" id="resp-escrita" class="w-full border p-3 rounded bg-white" placeholder="Digite a resposta do grupo...">`;
                     } else if(perguntaAtivaLocal.tipo === 'selecionada') {
                         perguntaAtivaLocal.opcoes.forEach(opcao => {
                             areaResp.innerHTML += `
-                                <button class="w-full text-left border p-3 rounded hover:bg-indigo-50 font-medium btn-opcao transition cursor-pointer" onclick="window.selecionarOpcaoLocal(this, '${opcao}')">
+                                <button class="w-full text-left border p-3 rounded hover:bg-indigo-50 font-medium btn-opcao transition cursor-pointer bg-white" onclick="window.selecionarOpcaoLocal(this, '${opcao}')">
                                     ${opcao}
                                 </button>`;
                         });
@@ -468,7 +476,7 @@
                     }
                 }
 
-                // Fase 3: Exibição do Ranking Geral Desbloqueado para Todos
+                // Fase 3: Exibição do Ranking Geral
                 if(status.mostrarRanking) {
                     mostrarSecao(areaFeedback);
                     document.getElementById('painel-ranking').classList.remove('hidden');
