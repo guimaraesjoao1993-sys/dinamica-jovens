@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinâmica Interativa de Jovens</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 min-h-screen flex flex-col justify-between">
+
+    <header class="bg-indigo-600 text-white p-4 shadow-md text-center font-bold text-xl tracking-wide">
+        ⚡ DINÂMICA EM TEMPO REAL ⚡
+    </header>
+
+    <main class="container mx-auto p-4 flex-grow max-w-xl">
+        
+        <section id="tela-cadastro" class="hidden bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-4 text-indigo-600 text-center">Registrar Grupo</h2>
+            <div class="mb-4">
+                <label class="block font-medium mb-1">Nome do Grupo:</label>
+                <input type="text" id="input-nome-grupo" class="w-full border p-2 rounded" placeholder="Ex: Jovens de Fé">
+            </div>
+            <div class="mb-4">
+                <label class="block font-medium mb-1">Membros (separados por vírgula):</label>
+                <textarea id="input-membros" class="w-full border p-2 rounded" rows="3" placeholder="Ex: Lucas, Mariana, Pedro..."></textarea>
+            </div>
+            <button id="btn-entrar" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded font-bold transition">
+                Entrar na Dinâmica
+            </button>
+        </section>
+
+        <section id="tela-quiz" class="hidden bg-white p-6 rounded-lg shadow-md text-center">
+            <div id="grupo-info" class="text-sm bg-indigo-50 text-indigo-700 p-2 rounded mb-4 font-semibold"></div>
+            
+            <div id="quiz-espera" class="py-8">
+                <div class="animate-bounce text-4xl mb-4">⏳</div>
+                <p class="text-lg font-medium text-gray-600">Aguardando o organizador liberar a pergunta...</p>
+            </div>
+
+            <div id="quiz-pergunta" class="hidden text-left">
+                <span id="pergunta-pontos" class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded"></span>
+                <h3 id="pergunta-enunciado" class="text-xl font-bold my-3 text-gray-900"></h3>
+                
+                <div id="area-resposta" class="space-y-3 my-4"></div>
+                
+                <button id="btn-enviar-resposta" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded font-bold transition">
+                    Enviar Resposta
+                </button>
+            </div>
+
+            <div id="quiz-feedback" class="hidden py-6">
+                </div>
+        </section>
+
+        <section id="tela-admin" class="hidden bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-4 text-red-600 border-b pb-2">🎛️ Painel do Organizador</h2>
+            
+            <div class="mb-6 bg-gray-50 p-4 rounded border">
+                <h4 class="font-bold mb-2 text-gray-700">Controle do Jogo:</h4>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btn-admin-revelar" class="bg-blue-600 text-white p-2 rounded text-sm font-semibold">Mostrar Resposta p/ Grupos</button>
+                    <button id="btn-admin-ranking" class="bg-purple-600 text-white p-2 rounded text-sm font-semibold">Mostrar Ranking Final</button>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded border">
+                <h4 class="font-bold mb-2 text-gray-700">Criar Nova Pergunta:</h4>
+                <div class="space-y-3 text-sm">
+                    <input type="text" id="admin-enunciado" class="w-full border p-2 rounded bg-white" placeholder="Enunciado da pergunta">
+                    <select id="admin-tipo" class="w-full border p-2 rounded bg-white">
+                        <option value="escrita">Escrita / Dissertativa</option>
+                        <option value="selecionada">Múltipla Escolha</option>
+                    </select>
+                    <input type="text" id="admin-opcoes" class="w-full border p-2 rounded bg-white hidden" placeholder="Opções (separadas por ponto e vírgula ';')">
+                    <input type="text" id="admin-correta" class="w-full border p-2 rounded bg-white" placeholder="Resposta Correta Exata">
+                    <input type="number" id="admin-pontos" class="w-full border p-2 rounded bg-white" value="10" placeholder="Pontuação">
+                    <button id="btn-admin-salvar" class="w-full bg-green-600 text-white p-2 rounded font-bold">Salvar Pergunta</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-gray-400 text-xs text-center p-3">
+        Desenvolvido para Dinâmicas de Grupo &copy; 2026
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, updateDoc, onSnapshot, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Configuração do Firebase (Substitua pelos seus dados do console do Firebase)
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_AUTH_DOMAIN",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_STORAGE_BUCKET",
+            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+            appId: "SUA_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- LÓGICA DE ROTAS E EXIBIÇÃO DE TELAS ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdmin = urlParams.get('admin') === 'true';
+
+        const telaCadastro = document.getElementById('tela-cadastro');
+        const telaQuiz = document.getElementById('tela-quiz');
+        const telaAdmin = document.getElementById('tela-admin');
+
+        if (isAdmin) {
+            telaAdmin.classList.remove('hidden');
+            configurarPainelAdmin();
+        } else {
+            const idGrupoSalvo = localStorage.getItem('idGrupoLogado');
+            if (idGrupoSalvo) {
+                telaQuiz.classList.remove('hidden');
+                inicializarFluxoQuiz(idGrupoSalvo);
+            } else {
+                telaCadastro.classList.remove('hidden');
+            }
+        }
+
+        // --- LÓGICA DO ORGANIZADOR (ADMIN) ---
+        function configurarPainelAdmin() {
+            const tipoSelect = document.getElementById('admin-tipo');
+            const opcoesInput = document.getElementById('admin-opcoes');
+            
+            tipoSelect.addEventListener('change', () => {
+                if(tipoSelect.value === 'selecionada') opcoesInput.classList.remove('hidden');
+                else opcoesInput.classList.add('hidden');
+            });
+
+            document.getElementById('btn-admin-salvar').addEventListener('click', async () => {
+                const enunciado = document.getElementById('admin-enunciado').value;
+                const tipo = tipoSelect.value;
+                const respostaCorreta = document.getElementById('admin-correta').value;
+                const pontuacao = Number(document.getElementById('admin-pontos').value);
+                const opcoesRaw = opcoesInput.value;
+
+                let dados = { enunciado, tipo, respostaCorreta, pontuacao };
+                if(tipo === 'selecionada') dados.opcoes = opcoesRaw.split(';');
+
+                await addDoc(collection(db, "perguntas"), dados);
+                alert("Pergunta salva com sucesso!");
+            });
+        }
+
+        // --- LÓGICA DOS LÍDERES (QUIZ) ---
+        document.getElementById('btn-entrar').addEventListener('click', async () => {
+            const nomeGrupo = document.getElementById('input-nome-grupo').value;
+            const membros = document.getElementById('input-membros').value.split(',');
+
+            if(!nomeGrupo) return alert("Insira o nome do grupo!");
+
+            const docRef = await addDoc(collection(db, "grupos"), {
+                nomeGrupo,
+                membros: membros.map(m => m.trim()),
+                pontuacaoTotal: 0,
+                respostas: {}
+            });
+
+            localStorage.setItem('idGrupoLogado', docRef.id);
+            location.reload();
+        });
+
+        function inicializarFluxoQuiz(idGrupo) {
+            // Escuta as mudanças do jogo em tempo real aqui...
+        }
+    </script>
+</body>
+</html>
