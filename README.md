@@ -4,6 +4,6 @@ Aplicação web em tempo real construída com HTML5, Tailwind CSS e Firebase Rea
 
 ## 🔗 Links de Acesso
 
-* **Tela dos Líderes (Os 8 grupos):** `https://seu-usuario.github.io/dinamica-jovens/`
+* **Tela dos Líderes (Os 8 grupos):** `https://guimaraesjoao1993-sys.github.io/dinamica-jovens/`
   
-* **Painel do Organizador (Seu controle):** `https://seu-usuario.github.io/dinamica-jovens/?admin=true`
+* **Painel do Organizador (Seu controle):** `https://guimaraesjoao1993-sys.github.io/dinamica-jovens/?admin=true`
